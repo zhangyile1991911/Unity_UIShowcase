@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ff7f89aca2b457aa1adfc5281459049, type: 3}
+  m_Name: UIAutoCreateInfoConfig
+  m_EditorClassIdentifier: 
+  uiInfoList:
+  - prefixName: Img_
+    typeName: Image
+  - prefixName: Txt_
+    typeName: TextMeshProUGUI
+  - prefixName: OBtn_
+    typeName: OClickButton
+  - prefixName: Btn_
+    typeName: Button
+  - prefixName: RectTran_
+    typeName: RectTransform
+  - prefixName: Anim_
+    typeName: Animation
+  - prefixName: Ins_
+    typeName: Transform
+  UIWindowViewTemplatePath: Assets/Editor/UISystemHelper/UITemplateCode/UIWindowViewTemplate.txt
+  UIWindowControlTemplatePath: Assets/Editor/UISystemHelper/UITemplateCode/UIWindowControlTemplate.txt
+  UIComponentViewTemplatePath: Assets/Editor/UISystemHelper/UITemplateCode/UIComponentViewTemplate.txt
+  UIComponentControlTemplatePath: Assets/Editor/UISystemHelper/UITemplateCode/UIComponentControlTemplate.txt
+  WindowScriptPath: Assets/Scripts/Example/UIExample/Window
+  ComponentScriptPath: Assets/Scripts/Example/UIExample/Component
+  WindowPrefabPath: Assets/Resources/OutGame/UIExample/Windows
+  ComponentPrefabPath: Assets/Resources/OutGame/UIExample/Components
+  WindowEnumScriptPath: Assets/Scripts/UISystem/Core/UIEnum.cs

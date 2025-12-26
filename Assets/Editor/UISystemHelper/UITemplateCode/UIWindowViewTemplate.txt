@@ -1,0 +1,28 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using UnityEngine.Playables;
+//using SuperScrollView;
+using UISystem.Core;
+using UISystem.Widget;
+
+namespace Example.UIExample.Window
+{
+    /// <summary>
+    /// Auto Generate Class!!!
+    /// </summary>
+    [UI((int){3},"{4}")]
+    public partial class {0} : UIWindow
+    {
+{1}
+        public override void Init(GameObject go)
+        {
+            uiGo = go;
+            UIEnum = {5};
+{2}
+            base.Init(go);
+        }
+    }
+}
