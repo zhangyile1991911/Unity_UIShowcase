@@ -2,15 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UISystem.Core;
-using UISystem.Widget;
+using GameSystem.UISystem.Core;
+using GameSystem.UISystem.Widget;
 
-namespace Example.UIExample.Window
+namespace GIM.UI.Window
 {
     /// <summary>
     /// Auto Generate Class!!!
     /// </summary>
-    public partial class {0} : UIWindow
+    public partial class {0} : {1}
     {
     
         public override void OnCreate()

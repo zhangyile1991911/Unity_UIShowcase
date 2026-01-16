@@ -10,6 +10,13 @@ namespace Editor
         private string newUIName;
         private GameObject uiRootGo;
 
+        private static List<string> UIComponentBase = new List<string>();
+        private static string[] WindowBaseArray;
+        private static int UIComponentBaseIndex = 0;
+        private static List<string> UIWindowBase = new List<string>();
+        private static string[] ComponentBaseArray;
+        private static int UIWindowBaseIndex = 0;
+
         [MenuItem("Custom Tools/UI生成/UIコード生成ツール", false, 10)]
         static void ShowEditor()
         {
@@ -17,6 +24,33 @@ namespace Editor
             window.minSize = new Vector2(400, 250);
             window.maxSize = new Vector2(400, 250);
             window.titleContent.text = "UIコード生成ツール";
+
+            //継承可能な基底クラスを収集する
+            UIComponentBaseIndex = 0;
+            UIWindowBaseIndex = 0;
+            
+            UIComponentBase.Clear();
+            UIComponentBase.Add(nameof(UIComponent));
+            
+            UIWindowBase.Clear();
+            UIWindowBase.Add(nameof(UIWindow));
+            Assembly GameSystem = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(s => s.GetName().Name == "GameSystem");
+            foreach (var one in GameSystem.GetTypes())
+            {
+                bool isUIComponent = one.IsSubclassOf(typeof(UIComponent));
+                if (isUIComponent)
+                {
+                    UIComponentBase.Add(one.Name);
+                }
+                bool isUIWindow = one.IsSubclassOf(typeof(UIWindow));
+                if (isUIWindow)
+                {
+                    UIWindowBase.Add(one.Name);
+                }
+            }
+
+            WindowBaseArray = UIWindowBase.ToArray();
+            ComponentBaseArray = UIComponentBase.ToArray();
         }
         [MenuItem("Custom Tools/UI生成/UIコードリフレッシュ", false, 11)]
         public static void RefreshAllClass()
@@ -115,11 +149,60 @@ namespace Editor
                         }
                         GUILayout.FlexibleSpace();    
                     }
-                    GUILayout.EndHorizontal();   
+                    GUILayout.EndHorizontal();
+
+                    GUILayout.BeginHorizontal();
+                    {
+                        GUILayout.BeginHorizontal();
+                        EditorGUILayout.LabelField("Window:",leftStyle,GUILayout.Width(60));
+                        UIWindowBaseIndex = EditorGUILayout.Popup(UIWindowBaseIndex,WindowBaseArray,GUILayout.Width(80));
+                        GUILayout.EndHorizontal();
+                        
+                        GUILayout.BeginHorizontal();
+                        EditorGUILayout.LabelField("Component:",leftStyle,GUILayout.Width(90));
+                        UIComponentBaseIndex = EditorGUILayout.Popup(UIComponentBaseIndex,ComponentBaseArray,GUILayout.Width(80));
+                        GUILayout.EndHorizontal();
+                        GUILayout.FlexibleSpace();  
+                    }
+                    GUILayout.EndHorizontal();
+
                 }
                 GUILayout.EndVertical();
             }
             GUILayout.EndArea();
+        }
+
+        private Type GetParentClassType()
+        {
+            if(uiRootGo == null)return null;
+            string className = uiRootGo.name;
+            var uiCodeAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(s => s.GetName().Name == "Assembly-CSharp");
+            foreach (var one in uiCodeAssembly.GetTypes())
+            {
+                if (one.Name == className)
+                {
+                    return one.BaseType;
+                }
+            }
+            return null;
+        }
+        
+        private void UpdateParentClassChoice()
+        {
+            var existedParentType = GetParentClassType();
+            UIWindowBaseIndex =0;
+            UIComponentBaseIndex =0;
+            if(existedParentType != null)
+            {
+                if(existedParentType.IsSubclassOf(typeof(UIWindow)))
+                {
+                    UIWindowBaseIndex = Array.IndexOf(WindowBaseArray,existedParentType.Name);
+                }
+                else if(existedParentType.IsSubclassOf(typeof(UIComponent)))
+                {
+                    UIComponentBaseIndex = Array.IndexOf(ComponentBaseArray,existedParentType.Name);
+                }
+            }
         }
         
         private void GeneratorWindow(GameObject go)
@@ -217,6 +300,16 @@ namespace Editor
         {
             string uiName = uiRootGo.name.Replace("UI", "");
             return uiName;
+        }
+
+        private string GetUIWindowParentName()
+        {
+            return UIWindowBase[UIWindowBaseIndex];
+        }
+
+        private string GetUIComponentParentName()
+        {
+            return UIComponentBase[UIComponentBaseIndex];
         }
         
         private void CheckTargetPath(string targetPath)

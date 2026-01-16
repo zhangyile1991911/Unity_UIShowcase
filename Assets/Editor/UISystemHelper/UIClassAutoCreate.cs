@@ -24,7 +24,7 @@ namespace Editor
     private string IgnoreCommonName = "Ins_";
     private UIAutoCreateInfoConfig infoConfig;
     
-    public void CreateWindow(string uiClassName, GameObject uiRootGo,UIAutoCreateInfoConfig config, bool isForceUpdate = false)
+    public void CreateWindow(string uiClassName,string uiParentClass,GameObject uiRootGo,UIAutoCreateInfoConfig config, bool isForceUpdate = false)
     {
         this.uiRootGo = uiRootGo;
         allNodeInfos.Clear();
@@ -64,6 +64,7 @@ namespace Editor
         var prefabResPath = $"{config.WindowPrefabPath}/{uiClassName}.prefab";
         templateFile = templateFile.Replace("{4}",prefabResPath);
         templateFile = templateFile.Replace("{5}",enumClassName);
+        templateFile = templateFile.Replace("{6}",uiParentClass);
         string uiVIewFilePath = string.Format("{0}/{1}View.cs", config.WindowScriptPath,uiClassName);
         if (!isForceUpdate && File.Exists(uiVIewFilePath))
         {
@@ -86,6 +87,17 @@ namespace Editor
         if (!File.Exists(uiControllerFilePath))
         {
             SaveFile(controlTemplateFile,uiControllerFilePath);
+        }
+        else
+        {//親クラスが一致かを判断する
+            UIWindowLifeConfig windowLifeConfig = AssetDatabase.LoadAssetAtPath<UIWindowLifeConfig>("Assets/Settings/UIWindowLifeConfig.asset");
+            Assembly UISystem = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(s => s.GetName().Name == windowLifeConfig.uiCodeScopeName);
+            Type uiClassType = UISystem.GetTypes().FirstOrDefault(x => x.Name == uiClassName);
+            var oldParentClassName = uiClassType.BaseType.Name;
+            if (!oldParentClassName.Equals(uiParentClass))
+            {//違った場合、元親クラスを書き換えする
+                ReplaceParentClass(uiControllerFilePath,oldParentClassName,uiParentClass);
+            }
         }
     }
 
@@ -266,6 +278,17 @@ namespace Editor
         if (!File.Exists(uiControllerFilePath))
         {
             SaveFile(controlTemplateFile,uiControllerFilePath);
+        }
+        else
+        {//親クラスが一致かを判断する
+            UIWindowLifeConfig windowLifeConfig = AssetDatabase.LoadAssetAtPath<UIWindowLifeConfig>("Assets/Settings/UIWindowLifeConfig.asset");
+            Assembly uiCodeAssembley = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(s => s.GetName().Name == windowLifeConfig.uiCodeScopeName);
+            Type uiClassType = uiCodeAssembley.GetTypes().FirstOrDefault(x => x.Name == uiComponentName);
+            var oldParentClassName = uiClassType.BaseType.Name;
+            if (!oldParentClassName.Equals(uiParentName))
+            {//違った場合、元親クラスを書き換えする
+                ReplaceParentClass(uiControllerFilePath,oldParentClassName,uiParentName);
+            }
         }
     }
     
