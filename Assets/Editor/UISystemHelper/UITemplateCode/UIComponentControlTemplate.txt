@@ -2,15 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UISystem.Core;
-using UISystem.Widget;
+using GameSystem.UISystem.Core;
+using GameSystem.UISystem.Widget;
 
-namespace Example.UIExample.Component
+namespace GIM.UI.Component
 {
     /// <summary>
     /// Auto Generate Class!!!
     /// </summary>
-    public partial class {0} : UIComponent
+    public partial class {0} : {2}
     {
         public {1}(GameObject go,UIWindow parent):base(go,parent)
         {
