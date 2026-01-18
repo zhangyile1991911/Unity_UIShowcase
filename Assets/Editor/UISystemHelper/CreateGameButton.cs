@@ -82,7 +82,7 @@ public class CreateGameButton
     
     private static Canvas EnsureCanvas()
     {
-        Canvas canvas = Object.FindObjectOfType<Canvas>();
+        Canvas canvas = Object.FindFirstObjectByType<Canvas>();
         if (canvas == null)
         {
             // Canvas生成
@@ -96,7 +96,7 @@ public class CreateGameButton
             canvasGO.layer = LayerMask.NameToLayer("UI");
 
             // EventSystemに紐付け
-            if (Object.FindObjectOfType<EventSystem>() == null)
+            if (Object.FindFirstObjectByType<EventSystem>() == null)
             {
                 GameObject eventSystem = new GameObject("EventSystem");
                 eventSystem.AddComponent<EventSystem>();

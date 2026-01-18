@@ -1,4 +1,8 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using UISystem.Core;
 using UnityEditor;
 using UnityEngine;
@@ -34,7 +38,7 @@ namespace Editor
             
             UIWindowBase.Clear();
             UIWindowBase.Add(nameof(UIWindow));
-            Assembly GameSystem = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(s => s.GetName().Name == "GameSystem");
+            Assembly GameSystem = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(s => s.GetName().Name == "UISystem");
             foreach (var one in GameSystem.GetTypes())
             {
                 bool isUIComponent = one.IsSubclassOf(typeof(UIComponent));
@@ -51,28 +55,6 @@ namespace Editor
 
             WindowBaseArray = UIWindowBase.ToArray();
             ComponentBaseArray = UIComponentBase.ToArray();
-        }
-        [MenuItem("Custom Tools/UI生成/UIコードリフレッシュ", false, 11)]
-        public static void RefreshAllClass()
-        {
-            UIAutoCreateInfoConfig config = AssetDatabase.LoadAssetAtPath<UIAutoCreateInfoConfig>("Assets/Editor/UIAutoCreateInfoConfig.asset");
-            // Componentクラスリフレッシュ
-            string[] componentPrefabPaths = Directory.GetFiles(config.ComponentPrefabPath, "*.prefab", SearchOption.AllDirectories);
-            foreach (string path in componentPrefabPaths)
-            {
-                GameObject componentPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                string uiName = componentPrefab.name.Replace("UI", "");
-                new UIClassAutoCreate().CreateComponent(uiName, componentPrefab, config, true);
-            }
-            
-            // Windowクラスリフレッシュ
-            string[] windowPrefabPaths = Directory.GetFiles(config.WindowPrefabPath, "*.prefab", SearchOption.AllDirectories);
-            foreach (string path in windowPrefabPaths)
-            {
-                GameObject windowPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                string uiName = windowPrefab.name.Replace("UI", "");
-                new UIClassAutoCreate().CreateWindow(uiName, windowPrefab, config, true);
-            }
         }
 
         private void OnGUI()
@@ -176,7 +158,7 @@ namespace Editor
         {
             if(uiRootGo == null)return null;
             string className = uiRootGo.name;
-            var uiCodeAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(s => s.GetName().Name == "Assembly-CSharp");
+            var uiCodeAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(s => s.GetName().Name == "Example");
             foreach (var one in uiCodeAssembly.GetTypes())
             {
                 if (one.Name == className)
@@ -244,10 +226,10 @@ namespace Editor
         {
             if (uiRootGo == null) throw new System.Exception("生成するノードを入れてください");
             string uiName = GetUIName();
-
+            string parentClassName = GetUIWindowParentName();
             var targetPath = config.WindowScriptPath;
             CheckTargetPath(targetPath);
-            new UIClassAutoCreate().CreateWindow(uiName,uiRootGo,config);
+            new UIClassAutoCreate().CreateWindow(uiName,parentClassName,uiRootGo,config);
         }
         
         private void GeneratorComponent(GameObject go)
@@ -262,10 +244,11 @@ namespace Editor
             if (uiRootGo == null) throw new System.Exception("プレハブのルートノードをドラッグ＆ドロップしてください。");
             string uiName = GetUIName();
             
+            var parentClassName = GetUIComponentParentName();
             var targetPath = config.WindowScriptPath;
             CheckTargetPath(targetPath);
             
-            new UIClassAutoCreate().CreateComponent(uiName,uiRootGo,config);
+            new UIClassAutoCreate().CreateComponent(uiName,parentClassName,uiRootGo,config);
         }
 
         private void CreateComponentPrefab(GameObject gameObject,UIAutoCreateInfoConfig config)
