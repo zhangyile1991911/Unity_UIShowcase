@@ -295,7 +295,28 @@ namespace Editor
 
         void ReplaceParentClass(string uiControllerFilePath,string oldParentClassName,string newParentClassName)
         {
-            
+            var newFilePath = uiClassFilePath + ".bak";
+            var firstFound = false;
+            using(var readFs = new FileStream(uiClassFilePath, FileMode.Open, FileAccess.Read))
+            using (var reader = new StreamReader(readFs))
+            using(var writeFs = new FileStream(newFilePath, FileMode.OpenOrCreate, FileAccess.Write))
+            using (var writer = new StreamWriter(writeFs))
+            {
+                while (reader.ReadLine() is { } line)
+                {
+                    if (!firstFound)
+                    {
+                        var isContain = line.Contains(oldParentClassName);
+                        if (isContain)
+                        {//マッチしたら,書き換えします
+                            line = line.Replace(oldParentClassName,newParentClassName);
+                            firstFound = true;    
+                        }
+                    }
+                    writer.WriteLine(line);
+                }
+            }
+            File.Replace(newFilePath,uiClassFilePath,null);
         }
     }
 }
