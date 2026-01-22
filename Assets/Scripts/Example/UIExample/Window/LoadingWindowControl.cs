@@ -10,6 +10,7 @@ namespace Example.UIExample.Window
     /// <summary>
     /// Auto Generate Class!!!
     /// </summary>
+    [UILifeTime(UILifeTimeType.Transient)]
     public partial class LoadingWindow : UIWindow
     {
     

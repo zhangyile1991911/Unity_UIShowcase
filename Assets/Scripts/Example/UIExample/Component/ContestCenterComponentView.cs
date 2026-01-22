@@ -13,7 +13,7 @@ namespace Example.UIExample.Component
     /// <summary>
     /// Auto Generate Class!!!
     /// </summary>
-    [UI(0,"Assets/Resources/OutGame/UIExample/Components/ContestCenterComponent.prefab")]
+    [UI("Assets/Resources/OutGame/UIExample/Components/ContestCenterComponent.prefab")]
     public partial class ContestCenterComponent : UIComponent
     {
 		public OClickButton OBtn_Course;

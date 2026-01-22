@@ -24,7 +24,6 @@ namespace UISystem.Core
         public string ComponentScriptPath;
         public string WindowPrefabPath;
         public string ComponentPrefabPath;
-        public string WindowEnumScriptPath;
     }
     
     

@@ -13,6 +13,7 @@ namespace Example.UIExample.Window
     /// <summary>
     /// Auto Generate Class!!!
     /// </summary>
+    [UILifeTime(UILifeTimeType.Permanent)]
     public partial class GlobalTopMenuWindow : UIWindow
     {
         private TopResComponent _topRes;
@@ -80,7 +81,7 @@ namespace Example.UIExample.Window
 
         private async UniTask OnClickIdol()
         {
-            HomeWindow home = UIManager.Get(UIEnum.HomeWindow) as HomeWindow;
+            HomeWindow home = UIManager.Get<HomeWindow>();
             using(new TransitionLocker(this))
             {
                 await home.TransitToIdol();
@@ -89,7 +90,7 @@ namespace Example.UIExample.Window
 
         private async UniTask OnClickHome()
         {
-            HomeWindow home = UIManager.Get(UIEnum.HomeWindow) as HomeWindow;
+            HomeWindow home = UIManager.Get(typeof(HomeWindow)) as HomeWindow;
             using(new TransitionLocker(this))
             {
                 await home.TransitToHome();
@@ -98,7 +99,7 @@ namespace Example.UIExample.Window
         
         private async UniTask OnClickContest()
         {
-            HomeWindow home = UIManager.Get(UIEnum.HomeWindow) as HomeWindow;
+            HomeWindow home = UIManager.Get<HomeWindow>();
             using (new TransitionLocker(this))
             {
                 await home.TransitToContest();
@@ -107,7 +108,7 @@ namespace Example.UIExample.Window
 
         private async UniTask OnClickCommunication()
         {
-            HomeWindow home = UIManager.Get(UIEnum.HomeWindow) as HomeWindow;
+            HomeWindow home = UIManager.Get<HomeWindow>();
             using (new TransitionLocker(this))
             {
                await home.TransitToCommunication();
@@ -116,7 +117,7 @@ namespace Example.UIExample.Window
 
         private async UniTask OnClickGachaFull()
         {
-            HomeWindow home = UIManager.Get(UIEnum.HomeWindow) as HomeWindow;
+            HomeWindow home = UIManager.Get<HomeWindow>();
             using (new TransitionLocker(this))
             {
                 await home.TransitToGachaFull();
@@ -126,7 +127,7 @@ namespace Example.UIExample.Window
         private async UniTask OnClickBackHome()
         {
             UIWindow topWindow = UIManager.CurrentTopWindow();
-            await topWindow.TransitionWithLoading(UIEnum.HomeWindow);
+            await topWindow.TransitionWithLoading<HomeWindow>();
             SwitchFooterToMain();
         }
 

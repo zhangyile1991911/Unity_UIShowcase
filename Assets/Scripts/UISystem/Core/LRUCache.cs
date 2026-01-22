@@ -14,7 +14,7 @@ namespace UISystem.Core
         public Node<TKey, TValue> Next { get; set; }
     }
 
-    public class LRUCache<TKey, TValue> where TKey : IComparable
+    public class LRUCache<TKey, TValue>
     {
         public Action<TValue> OnRemove;
         private readonly int capacity;
@@ -163,7 +163,7 @@ namespace UISystem.Core
             var curNode = head;
             while (curNode != null)
             {
-                if (curNode.Key.CompareTo(key) == 0)
+                if (curNode.Key.Equals(key))
                 {
                     var previous = curNode.Previous;
                     var next = curNode.Next;

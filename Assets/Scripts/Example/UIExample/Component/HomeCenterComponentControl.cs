@@ -88,7 +88,7 @@ namespace Example.UIExample.Component
 
         public async UniTask TransitionTo()
         {
-            await ParentWindow.TransitionWithLoading(UIEnum.ProduceWindow,null,UILayer.Center);
+            await ParentWindow.TransitionWithLoading<Window.ProduceWindow>(null,UILayer.Center);
             ParentWindow.SwitchFooterPattern(false);
         }
     }

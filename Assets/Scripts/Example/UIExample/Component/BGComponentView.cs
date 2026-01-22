@@ -13,7 +13,7 @@ namespace Example.UIExample.Component
     /// <summary>
     /// Auto Generate Class!!!
     /// </summary>
-    [UI(0,"Assets/Resources/OutGame/UIExample/Components/BGComponent.prefab")]
+    [UI("Assets/Resources/OutGame/UIExample/Components/BGComponent.prefab")]
     public partial class BGComponent : UIComponent
     {
 		public Image Img_Bg;

@@ -28,7 +28,7 @@ namespace UISystem.Core
             get => _uiLayer;
             set => _uiLayer = value;
         }
-        public UIEnum UIEnum { get; protected set; }
+        
         public bool IsActive => uiGo.activeSelf;
 
         private List<UIComponent> _childComponent = new List<UIComponent>(10);

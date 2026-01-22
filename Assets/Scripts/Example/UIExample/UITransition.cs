@@ -24,16 +24,16 @@ namespace UISystem.Core
         public static UIManager _uiManager;
         
         //元画面が左へ移動と共にフェードアウト
-        public static async UniTaskVoid TransitionToLeftFadeOut(this UIWindow uiWindow,
-            UIEnum openUIEnum,
+        public static async UniTaskVoid TransitionToLeftFadeOut<T>(this UIWindow uiWindow,
             UIOpenParam openParam = null,
             UILayer uiLayer = UILayer.Bottom,
-            bool isRecord = true)
+            bool isRecord = true)where T : UIWindow
         {
-            UIEnum currentTop = _uiManager.PeekHistory();
-            if (currentTop != UIEnum.InValid)
+            Type openWindow = typeof(T);
+            Type currentTop = _uiManager.PeekHistory();
+            if (currentTop != null)
             {
-                if (openUIEnum == currentTop) return;
+                if (openWindow == currentTop) return;
             
                 UIWindow currentTopWindow = _uiManager.Get(currentTop) as UIWindow;
                 Animation animation = currentTopWindow.uiTran.GetComponent<Animation>();
@@ -41,24 +41,24 @@ namespace UISystem.Core
                 await UniTask.WaitUntil(() => animation.isPlaying == false,cancellationToken: uiWindow.Token);    
             }
             
-            UIWindow nextWindow = await _uiManager.OpenUIAsync(openUIEnum,null,UILayer.Center) as UIWindow;
+            UIWindow nextWindow = await _uiManager.OpenUIAsync<T>(null,UILayer.Center) as UIWindow;
             if (isRecord)
             {
-                _uiManager.RecordUI(nextWindow.UIEnum);
+                _uiManager.RecordUI(openWindow);
             }
         }
         
-        public static async UniTaskVoid TransitionToRightFadeOut(this UIWindow uiWindow,
-            UIEnum openUIEnum,
+        public static async UniTaskVoid TransitionToRightFadeOut<T>(this UIWindow uiWindow,
             UIOpenParam openParam = null,
             Action<IUIBase> onFinish = null,
             UILayer uiLayer = UILayer.Bottom,
-            bool isRecord = true)
+            bool isRecord = true)where T : UIWindow
         {
-            UIEnum currentTop = _uiManager.PeekHistory();
-            if (currentTop != UIEnum.InValid)
+            Type currentTop = _uiManager.PeekHistory();
+            Type openWindowType = typeof(T);
+            if (currentTop != null)
             {
-                if (openUIEnum == currentTop) return;
+                if (openWindowType == currentTop) return;
             
                 UIWindow currentTopWindow = _uiManager.Get(currentTop) as UIWindow;
                 Animation animation = currentTopWindow.uiTran.GetComponent<Animation>();
@@ -66,17 +66,17 @@ namespace UISystem.Core
                 await UniTask.WaitUntil(() => animation.isPlaying == false,cancellationToken: uiWindow.Token);    
             }
            
-            UIWindow nextWindow = await _uiManager.OpenUIAsync(openUIEnum,null,UILayer.Center) as UIWindow;
+            UIWindow nextWindow = await _uiManager.OpenUIAsync<T>(null,UILayer.Center) as UIWindow;
             if (isRecord)
             {
-                _uiManager.RecordUI(nextWindow.UIEnum);    
+                _uiManager.RecordUI(openWindowType);
             }
         }
 
         public static async void SwitchFooterPattern(this UIWindow uIWindow,
             bool isMain)
         {
-            GlobalTopMenuWindow topMenuWindow = _uiManager.Get(UIEnum.GlobalTopMenuWindow) as GlobalTopMenuWindow;
+            GlobalTopMenuWindow topMenuWindow = _uiManager.Get<GlobalTopMenuWindow>();
             if(isMain)
             {
                 topMenuWindow.SwitchFooterToMain();
@@ -87,30 +87,29 @@ namespace UISystem.Core
             }
         }
 
-        public static async UniTask TransitionWithLoading(this UIWindow uIWindow,
-            UIEnum openUIEnum,
+        public static async UniTask TransitionWithLoading<T>(this UIWindow uIWindow,
             UIOpenParam openParam = null,
             UILayer uiLayer = UILayer.Center,
-            bool isRecord = true)
+            bool isRecord = true)where T : UIWindow
         {
             //1. LoadingWindowを表示しておく
             //2. 遷移先を読み込んでから表示する
             //3. LoadingWindowを非表示する
-            
+            var openWindowType = typeof(T);
             //LoadingWindowは常駐ですから、ゲーム開始時に生成されてインメモリーに置いておいた
-            _uiManager.OpenUI(UIEnum.LoadingWindow,null,null,UILayer.Top);
+            _uiManager.OpenUI<LoadingWindow>(null,null,UILayer.Top);
 
             _uiManager.CloseWindow(uIWindow);
 
-            await _uiManager.OpenUIAsync(openUIEnum,openParam,uiLayer);
+            await _uiManager.OpenUIAsync<T>(openParam,uiLayer);
             //仮に遷移先が重いです
             await UniTask.WaitForSeconds(1.5f);
             if(isRecord)
             {
-                _uiManager.RecordUI(openUIEnum);
+                _uiManager.RecordUI(openWindowType);
             }
 
-            _uiManager.CloseUI(UIEnum.LoadingWindow);
+            _uiManager.CloseUI(typeof(LoadingWindow));
 
         }
         

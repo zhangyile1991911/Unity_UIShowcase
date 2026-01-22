@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using Common;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -12,7 +13,7 @@ namespace UISystem.Core
 {
     public class UIManager
     {
-        private LRUCache<UIEnum, IUIBase> _uiCachedDic;
+        private LRUCache<Type, IUIBase> _uiCachedDic;
 
         private Transform _bottom;
 
@@ -38,35 +39,39 @@ namespace UISystem.Core
        
         public int Capacity { get; private set; }
 
-        Stack<UIEnum> _openHistory = new ();
+        Stack<Type> _openHistory = new ();
 
-        public void RecordUI(UIEnum uIEnum)
+        public void RecordUI(Type uIEnum)
         {
             _openHistory.Push(uIEnum);
         }
 
-        public UIEnum PeekHistory()
+        public Type PeekHistory()
         {
             if(_openHistory.Count > 0)
             {
                 return _openHistory.Peek();    
             }
-            return UIEnum.InValid;
+            return null;
         }
 
-        public UIWindow CurrentTopWindow()
+        public UIWindow CurrentTopWindow(bool pop = false)
         {
-            UIEnum uiEnum = PeekHistory();
-            if(uiEnum == UIEnum.InValid)
+            Type uiType = PeekHistory();
+            if(uiType == null)
             {
                 return null;
             }
-            return Get(uiEnum) as UIWindow;
+
+            if (pop)
+            {
+                _openHistory.Pop();
+            }
+            return Get(uiType) as UIWindow;
         }
         
-        UIWindowLifeConfig _uiWindowConfig;
         //IUISystem interface begin
-        public IUIBase Get(UIEnum uiName)
+        public IUIBase Get(Type uiName)
         {
             IUIBase ui = null;
             if (!_uiCachedDic.TryGetValue(uiName, out ui))
@@ -75,6 +80,11 @@ namespace UISystem.Core
             }
 
             return ui;
+        }
+
+        public T Get<T>()where T : UIWindow
+        {
+            return Get(typeof(T)) as T;
         }
         
         //IUISystem interface end
@@ -91,39 +101,41 @@ namespace UISystem.Core
             onComplete?.Invoke(ui);
         }
         
-        public void OpenUI(UIEnum uiName,Action<IUIBase> onComplete = null,UIOpenParam openParam = null,UILayer layer = UILayer.Bottom)
+        public void OpenUI<T>(Action<IUIBase> onComplete = null,UIOpenParam openParam = null,UILayer layer = UILayer.Bottom)
         {
             IUIBase ui = null;
-            if (_uiCachedDic.TryGetValue(uiName, out ui))
+            Type uiType = typeof(T);
+            if (_uiCachedDic.TryGetValue(uiType, out ui))
             {
                 OnOpenUI(ui, onComplete, openParam,layer);
             }
             else
             {
-                bool isPermanent = _uiWindowConfig.WindowLife(uiName);
-                LoadUIAsync(uiName, loadUi=>
+                UILifeTime uiLifeTime = uiType.GetCustomAttribute<UILifeTime>();
+                LoadUIAsync(uiType, loadUi=>
                 {
                     OnOpenUI(loadUi,onComplete,openParam,layer);
-                },layer,isPermanent).Forget();
+                },layer,uiLifeTime.IsPermanent).Forget();
             }
         }
         
-        public UniTask<IUIBase> OpenUIAsync(UIEnum uiName,UIOpenParam openParam = null,UILayer layer = UILayer.Bottom)
+        public UniTask<IUIBase> OpenUIAsync<T>(UIOpenParam openParam = null,UILayer layer = UILayer.Bottom)
         {
             IUIBase ui = null;
-            if (_uiCachedDic.TryGetValue(uiName, out ui))
+            Type uiType = typeof(T);
+            if (_uiCachedDic.TryGetValue(uiType, out ui))
             {
                 OnOpenUI(ui, null, openParam, layer);
                 return new UniTask<IUIBase>(ui);
             }
-            bool isPermanent = _uiWindowConfig.WindowLife(uiName);
-            return LoadUIAsync(uiName, (loadUi) =>
+            UILifeTime uiLifeTime = uiType.GetCustomAttribute<UILifeTime>();
+            return LoadUIAsync(uiType, (loadUi) =>
             {
                 OnOpenUI(loadUi, null, openParam, layer);
-            }, layer, isPermanent);
+            }, layer, uiLifeTime.IsPermanent);
         }
 
-        public void CloseUI(UIEnum uiName)
+        public void CloseUI(Type uiName)
         {
             IUIBase ui = null;
             if (_uiCachedDic.TryGetValue(uiName, out ui))
@@ -134,10 +146,10 @@ namespace UISystem.Core
 
         public void CloseWindow(UIWindow uiWindow)
         {
-            CloseUI(uiWindow.UIEnum);
+            CloseUI(uiWindow.GetType());
         }
 
-        private void DestroyUI(UIEnum uiName)
+        private void DestroyUI(Type uiName)
         {
             _uiCachedDic.Remove(uiName);
         }
@@ -163,12 +175,12 @@ namespace UISystem.Core
             return null;
         }
         
-        private void LoadUI(UIEnum uiName,Action<IUIBase> onComplete,UILayer layer = UILayer.Bottom,bool isPermanent=false)
+        private void LoadUI(Type uiType,Action<IUIBase> onComplete,UILayer layer = UILayer.Bottom,bool isPermanent=false)
         {
             IUIBase ui = null;
-            if (!_uiCachedDic.TryGetValue(uiName, out ui))
+            if (!_uiCachedDic.TryGetValue(uiType, out ui))
             {
-                LoadUIAsync(uiName,(loadUi)=>
+                LoadUIAsync(uiType,(loadUi)=>
                 {
                     onComplete?.Invoke(loadUi);
                 },layer,isPermanent).Forget();
@@ -210,17 +222,13 @@ namespace UISystem.Core
             return ui;
         }
         #endif
-        private async UniTask<IUIBase> LoadUIAsync(UIEnum uiName, Action<IUIBase> onComplete,UILayer layer,bool isPermanent)
+        private async UniTask<IUIBase> LoadUIAsync(Type uiType, Action<IUIBase> onComplete,UILayer layer,bool isPermanent)
         {
             //クラスのプロパティーを取得する
-            Type uiType = Type.GetType($"{_uiWindowConfig.uiWindowScopeName}.{uiName.ToString()},{_uiWindowConfig.uiCodeScopeName}");
-            var attributes = uiType.GetCustomAttributes(false);
-            var uiPath = attributes
-                .Where(one => one is UIAttribute)
-                .Select(tmp=> (tmp as UIAttribute).ResPath).FirstOrDefault();
+            var attributes = uiType.GetCustomAttribute<UIAttribute>(false);
             
             //リソースを読み込む
-            var uiPrefab = await _resManager.LoadAssetAsync<GameObject>(uiPath);
+            var uiPrefab = await _resManager.LoadAssetAsync<GameObject>(attributes.ResPath);
             var parentNode = GetParentNode(layer);
             
             GameObject uiGameObject = InstantiatePrefab(uiPrefab,parentNode);
@@ -230,7 +238,7 @@ namespace UISystem.Core
             
             ui.uiLayer = layer;
             ui.Init(uiGameObject);
-            _uiCachedDic.Add(uiName,ui,isPermanent);
+            _uiCachedDic.Add(uiType,ui,isPermanent);
             onComplete?.Invoke(ui);
             return ui;
         }
@@ -245,10 +253,9 @@ namespace UISystem.Core
         }
         #else
         
-        public UIManager(IResourceManager resManager,UIWindowLifeConfig config)
+        public UIManager(IResourceManager resManager)
         {
             _resManager = resManager;
-            _uiWindowConfig = config;
             OnCreate();
             CreateHierarchyAgent();
         }
@@ -257,7 +264,7 @@ namespace UISystem.Core
         private GameObject _uiModule;
         private void OnCreate()
         {
-            _uiCachedDic = new LRUCache<UIEnum, IUIBase>(10);
+            _uiCachedDic = new LRUCache<Type, IUIBase>(10);
             _uiCachedDic.OnRemove += (ui) =>
             {
                 ui.OnHide();
@@ -296,7 +303,7 @@ namespace UISystem.Core
             agent.UIManagerInstance = this;
         }
 #if UNITY_EDITOR
-        public List<Node<UIEnum, IUIBase>> GetAllCache()
+        public List<Node<Type, IUIBase>> GetAllCache()
         {
             return _uiCachedDic.GetAllNodesByOrder();
         }

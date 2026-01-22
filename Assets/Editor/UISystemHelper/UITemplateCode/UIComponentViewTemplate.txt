@@ -14,7 +14,7 @@ namespace GIM.UI.Component
     /// <summary>
     /// Auto Generate Class!!!
     /// </summary>
-    [UI(0,"{3}")]
+    [UI("{3}")]
     public partial class {0} : {4}
     {
 {1}

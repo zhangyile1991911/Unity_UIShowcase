@@ -9,6 +9,7 @@ namespace Example.UIExample.Window
     /// <summary>
     /// Auto Generate Class!!!
     /// </summary>
+    [UILifeTime(UILifeTimeType.Permanent)]
     public partial class HomeWindow : UIWindow
     {
         private BGComponent _bgComponent;

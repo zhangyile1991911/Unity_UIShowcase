@@ -13,7 +13,7 @@ namespace Example.UIExample.Window
     /// <summary>
     /// Auto Generate Class!!!
     /// </summary>
-    [UI((int)UIEnum.LoadingWindow,"Assets/Resources/OutGame/UIExample/Windows/LoadingWindow.prefab")]
+    [UI("Assets/Resources/OutGame/UIExample/Windows/LoadingWindow.prefab")]
     public partial class LoadingWindow : UIWindow
     {
 		public Image Img_Bg;
@@ -21,7 +21,7 @@ namespace Example.UIExample.Window
         public override void Init(GameObject go)
         {
             uiGo = go;
-            UIEnum = UIEnum.LoadingWindow;
+            
 			Img_Bg = go.transform.Find("Img_Bg").GetComponent<Image>();
 
             base.Init(go);

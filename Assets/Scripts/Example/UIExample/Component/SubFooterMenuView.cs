@@ -13,7 +13,7 @@ namespace Example.UIExample.Component
     /// <summary>
     /// Auto Generate Class!!!
     /// </summary>
-    [UI(0,"Assets/Resources/OutGame/UIExample/Components/SubFooterMenu.prefab")]
+    [UI("Assets/Resources/OutGame/UIExample/Components/SubFooterMenu.prefab")]
     public partial class SubFooterMenu : UIComponent
     {
 		public OClickButton OBtn_home;

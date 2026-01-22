@@ -13,7 +13,7 @@ namespace Example.UIExample.Window
     /// <summary>
     /// Auto Generate Class!!!
     /// </summary>
-    [UI((int)UIEnum.ProduceWindow,"Assets/Resources/OutGame/UIExample/Windows/ProduceWindow.prefab")]
+    [UI("Assets/Resources/OutGame/UIExample/Windows/ProduceWindow.prefab")]
     public partial class ProduceWindow : UIWindow
     {
 		public OClickButton OBtn_Regular;
@@ -24,7 +24,7 @@ namespace Example.UIExample.Window
         public override void Init(GameObject go)
         {
             uiGo = go;
-            UIEnum = UIEnum.ProduceWindow;
+            
 			OBtn_Regular = go.transform.Find("OBtn_Regular").GetComponent<OClickButton>();
 			OBtn_Archive = go.transform.Find("OBtn_Archive").GetComponent<OClickButton>();
 			OBtn_Ranking = go.transform.Find("OBtn_Ranking").GetComponent<OClickButton>();

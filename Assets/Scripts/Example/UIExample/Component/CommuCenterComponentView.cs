@@ -13,7 +13,7 @@ namespace Example.UIExample.Component
     /// <summary>
     /// Auto Generate Class!!!
     /// </summary>
-    [UI(0,"Assets/Resources/OutGame/UIExample/Components/CommuCenterComponent.prefab")]
+    [UI("Assets/Resources/OutGame/UIExample/Components/CommuCenterComponent.prefab")]
     public partial class CommuCenterComponent : UIComponent
     {
 		public Animation Anim_ButtonLayer;

@@ -53,6 +53,31 @@ namespace Editor
                 }
             }
 
+            CollectionUIBaseAssembly();
+        }
+
+        static void CollectionUIBaseAssembly()
+        {
+            UIComponentBase.Clear();
+            UIComponentBase.Add(nameof(UIComponent));
+            
+            UIWindowBase.Clear();
+            UIWindowBase.Add(nameof(UIWindow));
+            Assembly GameSystem = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(s => s.GetName().Name == "UISystem");
+            foreach (var one in GameSystem.GetTypes())
+            {
+                bool isUIComponent = one.IsSubclassOf(typeof(UIComponent));
+                if (isUIComponent)
+                {
+                    UIComponentBase.Add(one.Name);
+                }
+                bool isUIWindow = one.IsSubclassOf(typeof(UIWindow));
+                if (isUIWindow)
+                {
+                    UIWindowBase.Add(one.Name);
+                }
+            }
+
             WindowBaseArray = UIWindowBase.ToArray();
             ComponentBaseArray = UIComponentBase.ToArray();
         }
@@ -111,8 +136,13 @@ namespace Editor
                     {
                         // GUILayout.FlexibleSpace();
                         EditorGUILayout.LabelField("Prefabノード",leftStyle,GUILayout.Width(100));
-                        uiRootGo = (GameObject)EditorGUILayout.ObjectField(uiRootGo, typeof(GameObject), true);
-                        GUILayout.FlexibleSpace();    
+                        var newuiRootGo = (GameObject)EditorGUILayout.ObjectField(uiRootGo, typeof(GameObject), true);
+                        if(newuiRootGo != uiRootGo)
+                        {
+                            uiRootGo = newuiRootGo;
+                            UpdateParentClassChoice();
+                        }
+                        GUILayout.FlexibleSpace();
                     }
                     GUILayout.EndHorizontal();
             
@@ -135,6 +165,10 @@ namespace Editor
 
                     GUILayout.BeginHorizontal();
                     {
+                        if(WindowBaseArray == null || ComponentBaseArray == null)
+                        {
+                            CollectionUIBaseAssembly();
+                        }
                         GUILayout.BeginHorizontal();
                         EditorGUILayout.LabelField("Window:",leftStyle,GUILayout.Width(60));
                         UIWindowBaseIndex = EditorGUILayout.Popup(UIWindowBaseIndex,WindowBaseArray,GUILayout.Width(80));

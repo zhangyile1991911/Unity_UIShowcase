@@ -31,7 +31,7 @@ namespace UISystem.Core
             set;
         }
     
-        public bool IsActive => uiGo.active;
+        public bool IsActive => uiGo.activeSelf;
 
         #if USE_DI
         [Inject]

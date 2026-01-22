@@ -78,7 +78,6 @@ namespace Editor
             {
                 SaveFile(templateFile,uiVIewFilePath);
             }
-            AddWindowEnum(uiClassName,config.WindowEnumScriptPath);
             
             //生成控制代码
             //コードを生成する
@@ -91,44 +90,13 @@ namespace Editor
             }
             else
             {//親クラスが一致かを判断する
-                UIWindowLifeConfig windowLifeConfig = AssetDatabase.LoadAssetAtPath<UIWindowLifeConfig>("Assets/Settings/UIWindowLifeConfig.asset");
+                UIModuleConfig windowLifeConfig = AssetDatabase.LoadAssetAtPath<UIModuleConfig>("Assets/Settings/UIModuleConfig.asset");
                 Assembly UISystem = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(s => s.GetName().Name == windowLifeConfig.uiCodeScopeName);
                 Type uiClassType = UISystem.GetTypes().FirstOrDefault(x => x.Name == uiClassName);
                 var oldParentClassName = uiClassType.BaseType.Name;
                 if (!oldParentClassName.Equals(uiParentClass))
                 {//違った場合、元親クラスを書き換えする
                     ReplaceParentClass(uiControllerFilePath,oldParentClassName,uiParentClass);
-                }
-            }
-        }
-
-        void AddWindowEnum(string windowName,string enumFilePath)
-        {
-            var enumCodeFile = AssetDatabase.LoadAssetAtPath<TextAsset>(enumFilePath).text;
-            using (StringReader reader = new StringReader(enumCodeFile))
-            {
-                List<string> enumNames = new List<string>(0);
-                string line;
-                bool isExisted = false;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (line.Contains(windowName))
-                    {
-                        isExisted = true;
-                        break;
-                    }
-                        
-                    if (line.Contains('}'))
-                        break;
-                    enumNames.Add(line);
-                }
-
-                if (!isExisted)
-                {
-                    enumNames.Add("\t\t"+windowName+",");
-                    enumNames.Add("\t}");
-                    enumNames.Add("}");
-                    SaveFile(string.Join("\n",enumNames),enumFilePath);    
                 }
             }
         }
@@ -282,7 +250,7 @@ namespace Editor
             }
             else
             {//親クラスが一致かを判断する
-                UIWindowLifeConfig windowLifeConfig = AssetDatabase.LoadAssetAtPath<UIWindowLifeConfig>("Assets/Settings/UIWindowLifeConfig.asset");
+                UIModuleConfig windowLifeConfig = AssetDatabase.LoadAssetAtPath<UIModuleConfig>("Assets/Settings/UIModuleConfig.asset");
                 Assembly uiCodeAssembley = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(s => s.GetName().Name == windowLifeConfig.uiCodeScopeName);
                 Type uiClassType = uiCodeAssembley.GetTypes().FirstOrDefault(x => x.Name == uiComponentName);
                 var oldParentClassName = uiClassType.BaseType.Name;
@@ -293,7 +261,7 @@ namespace Editor
             }
         }
 
-        void ReplaceParentClass(string uiControllerFilePath,string oldParentClassName,string newParentClassName)
+        void ReplaceParentClass(string uiClassFilePath,string oldParentClassName,string newParentClassName)
         {
             var newFilePath = uiClassFilePath + ".bak";
             var firstFound = false;

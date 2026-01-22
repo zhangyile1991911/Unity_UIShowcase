@@ -13,7 +13,7 @@ namespace Example.UIExample.Component
     /// <summary>
     /// Auto Generate Class!!!
     /// </summary>
-    [UI(0,"Assets/Resources/OutGame/UIExample/Components/IdolCenterComponent.prefab")]
+    [UI("Assets/Resources/OutGame/UIExample/Components/IdolCenterComponent.prefab")]
     public partial class IdolCenterComponent : UIComponent
     {
 		public OClickButton OBtn_Memory;
